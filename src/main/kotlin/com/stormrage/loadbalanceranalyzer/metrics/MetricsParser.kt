@@ -10,7 +10,7 @@ import java.io.File
 import java.io.RandomAccessFile
 
 @Component
-class MetricsParser : MetricsProvider {
+class MetricsParser {
 
     @Value("\${metrics.filepath}")
     private lateinit var filePath: String
@@ -28,7 +28,7 @@ class MetricsParser : MetricsProvider {
         file = RandomAccessFile(File(filePath), READ_MODE)
     }
 
-    override fun getMetrics(): MetricsParserAnswer {
+    fun getMetrics(): MetricsParserAnswer {
         val metrics = mutableListOf<MetricsEntry>()
         val metricsText = getNewMetricsFromFile()
         metricsText.metrics.forEach {

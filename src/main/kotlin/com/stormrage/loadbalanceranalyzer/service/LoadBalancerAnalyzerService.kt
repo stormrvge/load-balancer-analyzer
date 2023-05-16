@@ -1,49 +1,30 @@
 package com.stormrage.loadbalanceranalyzer.service
 
-import com.stormrage.loadbalanceranalyzer.dao.MetricsEntryEntity
+import com.stormrage.loadbalanceranalyzer.metrics.MetricsParser
 import com.stormrage.loadbalanceranalyzer.model.DistributionInfo
 import com.stormrage.loadbalanceranalyzer.model.MetricsParserAnswer
 import com.stormrage.loadbalanceranalyzer.model.ServerInformation
-import com.stormrage.loadbalanceranalyzer.metrics.MetricsParser
-import com.stormrage.loadbalanceranalyzer.repository.MetricsRepository
 import io.micrometer.core.instrument.Counter
 import io.micrometer.core.instrument.MeterRegistry
 import io.micrometer.core.instrument.Timer
 import mu.KotlinLogging
-import org.bson.types.ObjectId
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Service
 import java.util.concurrent.TimeUnit
-import javax.annotation.PostConstruct
 import kotlin.math.abs
 
 @Service
 class LoadBalancerAnalyzerService(
     private val metricParser: MetricsParser,
-    private val metricsRepository: MetricsRepository,
     private val meterRegistry: MeterRegistry
 ) {
     private val log = KotlinLogging.logger { }
-
-    @Value("\${database.enabled}")
-    private var useDatabase: Boolean = false
-
-    @Value("\${database.preload-period-hours}")
-    private var preloadPeriodHours: Int = 2
-
 
     @Value("\${threshold}")
     private var threshold: Double = 0.1
 
     private val serversInformation: HashMap<String, ServerInformation> = HashMap()
-
-    @PostConstruct
-    private fun initDatabase() {
-        if (useDatabase) {
-
-        }
-    }
 
     @Scheduled(fixedRateString = "\${scheduler.fixed-rate}", initialDelayString = "\${scheduler.delay}")
     fun runMetrics() {
@@ -96,17 +77,6 @@ class LoadBalancerAnalyzerService(
 
                 serversInformation[it.serverInfo]!!.windowRequestCount++
                 serversInformation[it.serverInfo]!!.totalRequestCount++
-
-                if (useDatabase) {
-                    metricsRepository.save(MetricsEntryEntity(
-                        ObjectId.get().toHexString(),
-                        it.requestTime,
-                        it.responseTime,
-                        it.duration,
-                        it.httpCode,
-                        it.serverInfo
-                    ))
-                }
             }
 
             checkRequestDistribution(shouldCountForWindow)

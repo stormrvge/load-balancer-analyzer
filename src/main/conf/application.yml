@@ -1,8 +1,3 @@
-# Save all metrics in MongoDB and read at application start from MongoDB.
-database:
-  enabled: true
-  preload-period-hours: 2
-
 # threshold difference in percents (0.1 = 10%)
 threshold: 0.1
 
