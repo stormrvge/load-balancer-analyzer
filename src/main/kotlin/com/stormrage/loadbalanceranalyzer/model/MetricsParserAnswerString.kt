@@ -1,11 +1,11 @@
 package com.stormrage.loadbalanceranalyzer.model
 
-data class MetricsParserAnswer(
+data class MetricsParserAnswerString(
     val metrics: List<String>,
     val shouldContinue: Boolean
 )
 
-data class MetricsParserEntity(
+data class MetricsParserAnswer(
     val metrics: List<MetricsEntry>,
     val shouldContinue: Boolean
 )

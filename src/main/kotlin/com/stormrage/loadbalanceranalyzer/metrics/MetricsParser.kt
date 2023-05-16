@@ -1,16 +1,16 @@
-package com.stormrage.loadbalanceranalyzer.parser
+package com.stormrage.loadbalanceranalyzer.metrics
 
 import com.stormrage.loadbalanceranalyzer.model.MetricsEntry
+import com.stormrage.loadbalanceranalyzer.model.MetricsParserAnswerString
 import com.stormrage.loadbalanceranalyzer.model.MetricsParserAnswer
-import com.stormrage.loadbalanceranalyzer.model.MetricsParserEntity
 import jakarta.annotation.PostConstruct
 import org.springframework.beans.factory.annotation.Value
-import org.springframework.stereotype.Service
+import org.springframework.stereotype.Component
 import java.io.File
 import java.io.RandomAccessFile
 
-@Service
-class MetricsParser {
+@Component
+class MetricsParser : MetricsProvider {
 
     @Value("\${metrics.filepath}")
     private lateinit var filePath: String
@@ -28,20 +28,20 @@ class MetricsParser {
         file = RandomAccessFile(File(filePath), READ_MODE)
     }
 
-    fun getMetrics(): MetricsParserEntity {
+    override fun getMetrics(): MetricsParserAnswer {
         val metrics = mutableListOf<MetricsEntry>()
         val metricsText = getNewMetricsFromFile()
         metricsText.metrics.forEach {
             metrics.add(parseMetric(it))
         }
 
-        return MetricsParserEntity(
+        return MetricsParserAnswer(
             metrics,
             metricsText.shouldContinue
         )
     }
 
-    private fun getNewMetricsFromFile(): MetricsParserAnswer {
+    private fun getNewMetricsFromFile(): MetricsParserAnswerString {
         file.seek(lastReadPosition)
 
         val newMetrics = mutableListOf<String>()
@@ -61,7 +61,7 @@ class MetricsParser {
         }
 
         lastReadPosition = file.filePointer
-        return MetricsParserAnswer(
+        return MetricsParserAnswerString(
             newMetrics,
             amount > MAX_METRICS_LIST_SIZE
         )

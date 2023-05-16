@@ -1,0 +1,14 @@
+<configuration scan="true">
+    <property name="GRAYLOG_APP" value="load-balancer-analyzer"/>
+
+    <logger name="com.stormrage" level="DEBUG"/>
+    <logger name="org.springframework" level="INFO"/>
+    <logger name="org.hibernate" level="ERROR"/>
+    <logger name="jndi" level="ERROR"/>
+    <logger name="org.reflections" level="ERROR"/>
+    <logger name="org.apache" level="OFF" />
+    <logger name="httpclient" level="OFF" />
+    <logger name="org.graylog2.gelfclient" level="INFO"/>
+
+    <include resource="com/justai/logging/logback/default.xml"/>
+</configuration>
