@@ -97,7 +97,9 @@ class LoadBalancerAnalyzerService(
 
         // Check distribution for total requests
         distributionDiff(
-            serversInformation.entries.sumOf { it.value.totalRequestCount }, idealShare
+            serversInformation.entries.sumOf { it.value.totalRequestCount },
+            idealShare,
+            false
         ).forEach {
             if (!it.goodDistribution) {
                 countTotalUnevenDistribution()
@@ -108,7 +110,9 @@ class LoadBalancerAnalyzerService(
         // Check distribution for window
         if (shouldCountForWindow) {
             distributionDiff(
-                serversInformation.entries.sumOf { it.value.windowRequestCount }, idealShare
+                serversInformation.entries.sumOf { it.value.windowRequestCount },
+                idealShare,
+                true
             ).forEach {
                 if (!it.goodDistribution) {
                     countWindowUnevenDistribution()
@@ -118,19 +122,24 @@ class LoadBalancerAnalyzerService(
         }
     }
 
-    private fun distributionDiff(requestsCount: Long, idealShare: Double): List<DistributionInfo> {
+    private fun distributionDiff(requestsCount: Long, idealShare: Double, isWindow: Boolean): List<DistributionInfo> {
         val distributionInfoList = mutableListOf<DistributionInfo>()
 
         for ((server, info) in serversInformation) {
-            val share = info.totalRequestCount.toDouble() / requestsCount
+            val totalHostRequestsCount = if (isWindow) {
+                info.windowRequestCount
+            } else {
+                info.totalRequestCount
+            }.toDouble()
+            val share = totalHostRequestsCount / requestsCount
             val diff = abs(share - idealShare)
             if (diff > threshold) {
                 distributionInfoList.add(DistributionInfo(false, server, share))
             } else {
-                distributionInfoList.add(DistributionInfo(false, server, share))
+                distributionInfoList.add(DistributionInfo(true, server, share))
             }
         }
-        return listOf()
+        return distributionInfoList
     }
 
     private fun countNotAvailableTotal(host: String) {
